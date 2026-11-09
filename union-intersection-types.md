@@ -1,77 +1,67 @@
-# Union and Intersection Types in TypeScript
-### Building Flexible Data Structures with `|` and `&`
+# One Notification, Two Possibilities: Understanding Union and Intersection Types
 
-**Introduction**
+### The Scenario
 
-Real-world applications rarely have data that follows only one fixed structure. Sometimes a value can have different possible shapes. Other times, an object needs to satisfy multiple requirements simultaneously. TypeScript solves these situations with Union and Intersection types.
+Suppose we are developing a notification system. Some users receive notifications through email, while others receive them through SMS. Both options have different required information.
 
-## 1. Union: One of Several Possibilities
+This is where TypeScript's union (`|`) operator becomes useful.
 
-The Union operator (`|`) allows a value to match one of several types.
-
-Consider a notification system that supports email and SMS:
+### First, Define the Alternatives
 
 ```ts
-type Email = {
+type EmailNotification = {
     email: string;
     subject: string;
 };
 
-type SMS = {
+type SMSNotification = {
     phone: string;
     message: string;
 };
 
-type NotificationContent = Email | SMS;
+type NotificationContent =
+    | EmailNotification
+    | SMSNotification;
 ```
 
-Here, `NotificationContent` can represent either an email or an SMS structure.
+The union means that a notification can follow either structure. It does not require both structures at once.
 
-## 2. Intersection: Combining Requirements
+### Now, Add Something They Share
 
-The Intersection operator (`&`) combines multiple types. The resulting value must satisfy all combined requirements.
+Every notification also needs an ID and a creation date. Instead of repeating these properties, we can create a shared type:
 
 ```ts
-type Tracking = {
+type TrackingInfo = {
     id: number;
     createdAt: Date;
 };
-
-type EmailNotification = Email & Tracking;
 ```
 
-Now an `EmailNotification` must contain the email properties as well as the tracking properties.
-
-## 3. Using Both Together
-
-We can combine the two approaches:
+Now comes the intersection (`&`) operator:
 
 ```ts
 type Notification =
-    (Email | SMS) & Tracking;
+    NotificationContent & TrackingInfo;
 ```
 
-This means a notification must satisfy the tracking requirements and must also follow either the email or SMS structure.
+The intersection combines requirements. A valid notification must contain the tracking information and satisfy one of the notification alternatives.
 
-For example, a valid email notification could look like this:
+We can make the alternatives even clearer with a `channel` property:
 
 ```ts
-const notification: Notification = {
-    email: "user@example.com",
-    subject: "Welcome",
-    id: 101,
-    createdAt: new Date()
-};
+type Notification =
+    (
+        | { channel: "email"; email: string }
+        | { channel: "sms"; phone: string }
+    ) & TrackingInfo;
 ```
 
-## 4. Quick Comparison
+Now TypeScript can distinguish the notification channel using its literal value.
 
-| Union (`|`) | Intersection (`&`) |
-|---|---|
-| Represents alternatives | Combines requirements |
-| Either compatible type | All combined types |
-| Useful for different data shapes | Useful for shared properties |
+### The Big Difference
 
-**Final Thought**
+Think of union as **choosing an alternative**, while intersection means **combining requirements**.
 
-Union and Intersection types help developers model real application requirements more accurately. Understanding when to use alternatives and when to combine requirements is an important part of writing reliable TypeScript code.
+### Conclusion
+
+Union and intersection types are useful tools for designing flexible data models. When used together, they help represent real application scenarios without sacrificing type safety.
